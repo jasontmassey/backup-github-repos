@@ -1,0 +1,16 @@
+#!/usr/local/bin/bash
+
+backup_dir=github-backup-$(date +%Y%m%dT%H%M)
+if ! mkdir $backup_dir ; then
+    echo cannot create backup directory $backup_dir
+    exit 1
+fi
+
+if ! cd $backup_dir; then
+    echo cannot cd into backup directory $backup_dir
+    exit 1
+fi
+
+for repo_url in $(curl -s https://api.github.com/users/janixman/repos | jq '.[] | {clone_url}' | grep clone_url | sed 's/.*"clone_url": //' | sed 's/"//g'); do
+    git clone $repo_url
+done
