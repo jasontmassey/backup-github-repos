@@ -1,8 +1,10 @@
-#!/usr/local/bin/bash
+#!/bin/env bash
 
-user_to_backup=janixman
+user_to_backup=jasontmassey
 
-backup_dir=github-backup-$(date +%Y%m%dT%H%M)
+backup_dir=github-backup-$user_to_backup-$(date +%Y%m%dT%H%M%Z)
+ext=tgz
+
 if ! mkdir $backup_dir ; then
     echo cannot create backup directory $backup_dir
     exit 1
@@ -13,6 +15,24 @@ if ! cd $backup_dir; then
     exit 1
 fi
 
+# for each repo, clone it down into $backup_dir
 for repo_url in $(curl -s https://api.github.com/users/$user_to_backup/repos | jq '.[] | {clone_url}' | grep clone_url | sed 's/.*"clone_url": //' | sed 's/"//g'); do
-    git clone $repo_url
+    echo -n attempting to clone $repo_url ...
+    if git clone $repo_url &> /dev/null ; then
+        echo success
+    else
+        echo FAIL
+    fi
 done
+
+# cd back to starting location, gzip+tar, then blow away the directory
+if cd - &> /dev/null; then
+
+    echo -n tar-ing ... 
+    if tar czf ${backup_dir}.$ext $backup_dir ; then
+        echo success
+        rm -rf $backup_dir
+    else
+        echo FAIL
+    fi
+fi
