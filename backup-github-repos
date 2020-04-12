@@ -2,7 +2,7 @@
 
 user_to_backup=jasontmassey
 
-backup_dir=github-backup-$user_to_backup-$(date +%Y%m%dT%H%M%Z)
+backup_dir=github-backup-$user_to_backup-$(date +%Y%m%dT%H%M%S%Z)
 ext=tgz
 
 if ! mkdir $backup_dir ; then
